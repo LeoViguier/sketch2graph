@@ -4,14 +4,32 @@ import argparse
 import os
 
 def load_image(path):
+    """
+    Loads an image as a 3D numpy array.
+    :param path: Path to the image file
+    :return: A 3D numpy array
+    """
     return np.array(Image.open(path)).astype(float)
 
 
 def index_mat(y, x):
+    """
+    Creates a matrix with the same dimensions as the image, where each row contains its index + 1.
+    :param y: Height of the image
+    :param x: Width of the image
+    :return: A 2D numpy array with the same dimensions as the image
+    """
     return np.array([np.array([j for _ in range(x)]) for j in range(y)][::-1])
 
 
 def get_graph(img, graph_color, top):
+    """
+    Extracts the graph from a 3D numpy array.
+    :param img: The image as a 3D numpy array
+    :param graph_color: Color of the graph in hex or RGB format (e.g. #ffffff or (255,255,255))
+    :param top: Defines whether the top or bottom of the graph is used, if the line is thicker than one pixel
+    :return: A 1D numpy array containing the graph, with arbitrary values
+    """
     if graph_color[0] != '#' and len(graph_color) == 3:
         graph_color = np.array(graph_color)
     elif graph_color[0] == '#' and len(graph_color) == 7:
@@ -41,6 +59,13 @@ def get_graph(img, graph_color, top):
 
 
 def change_values(sig, y_min, y_max):
+    """
+    Changes the values of the graph to fit the given y-range.
+    :param sig: The graph
+    :param y_min: Value of the lowest point of the y-axis
+    :param y_max: Value of the highest point of the y-axis
+    :return: The graph with the new values
+    """
     clean = [i for i in sig if str(i) != 'nan']
     ma, mi = max(clean), min(clean)
     for i, val in enumerate(sig):
@@ -51,6 +76,15 @@ def change_values(sig, y_min, y_max):
 
 
 def s2g(path, graph_color="#000000", y_min=0, y_max=1, top=True):
+    """
+    Converts a sketch of a graph into a graph.
+    :param path: Path to the image file
+    :param graph_color: Color of the graph in hex or RGB format (e.g. #ffffff or (255,255,255)). Defaults to #000000
+    :param y_min: Value of the lowest point of the y-axis. Defaults to 0
+    :param y_max: Value of the highest point of the y-axis. Defaults to 1
+    :param top: Defines whether the top or bottom of the graph is used, if the line is thicker than one pixel. Defaults to top.
+    :return: A numpy array containing the graph
+    """
     img = load_image(path)
     sig = get_graph(img, graph_color, top)
     if len(set([i for i in sig if str(i) != 'nan'])) > 1: # if there is only one value, there will be a division by zero error in the next step
@@ -59,6 +93,9 @@ def s2g(path, graph_color="#000000", y_min=0, y_max=1, top=True):
 
 
 def main():
+    """
+    Main function called when the script in command line mode is executed.
+    """
     parser = argparse.ArgumentParser(description='Sketch2Graph: A simple tool to convert a sketch of a graph into a graph.')
     parser.add_argument('-p', '--path', type=str, help='Path to the image file')
     parser.add_argument('-c', '--color', type=str, help='Color of the graph in hex or RGB format (e.g. #ffffff or 255,255,255). Defaults to #000000')
@@ -103,6 +140,7 @@ def main():
     sig = s2g(args.path, graph_color=args.color, y_min=y_min, y_max=y_max, top=args.top)
     np.save(args.output, sig)
     print("Saved graph as numpy array to", os.path.abspath(args.output))
+
 
 if __name__ == "__main__":
     main()
