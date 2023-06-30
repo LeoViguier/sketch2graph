@@ -138,7 +138,7 @@ def main():
         return
     
     sig = s2g(args.path, graph_color=args.color, y_min=y_min, y_max=y_max, top=args.top)
-    np.save(args.output, sig)
+    np.save(os.path.abspath(args.output), sig)
     print("Saved graph as numpy array to", os.path.abspath(args.output))
 
 
